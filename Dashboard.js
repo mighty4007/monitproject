@@ -1,22 +1,16 @@
-import React , {Component} from "react"
-
-import { HorizontalBar } from 'react-chartjs-2'
-
-import Grid from '@material-ui/core/Grid'
-import Widget from "../../components/Widget"
-
-import {
-  Accordion,
-  AccordionItem,
-  AccordionItemHeading,
-  AccordionItemPanel,
-  AccordionItemButton
-} from 'react-accessible-accordion';
-
-import 'react-accessible-accordion/dist/fancy-example.css';
-
-import Axios from 'axios'
 import { Typography } from "@material-ui/core";
+import Grid from '@material-ui/core/Grid';
+import Axios from 'axios';
+import React, { Component } from "react";
+import { Accordion, AccordionItem, AccordionItemButton, AccordionItemHeading, AccordionItemPanel } from 'react-accessible-accordion';
+import 'react-accessible-accordion/dist/fancy-example.css';
+import { HorizontalBar } from 'react-chartjs-2';
+import Widget from "../../components/Widget";
+
+
+
+
+
 
 export default class Dashboard extends Component {
 
@@ -75,9 +69,9 @@ export default class Dashboard extends Component {
       Axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
     //Axios.get('http://localhost:8080/').then(res => { 
 
-
-      Axios.get('http://localhost:8010/getAllEntityData').then(entity_res => {
-
+    
+      Axios.get('http://localhost:8888/getAllEntityData/').then(entity_res => {
+        
         const entity_labels= [];
         const entity_methods= [];
 
@@ -86,26 +80,26 @@ export default class Dashboard extends Component {
         const response =entity_res.data;
         const hitDataGroupBy_Entity =response.hitDataGroupBy_Entity;
         const hitDataGroupBy_Entity_Method =response.hitDataGroupBy_Entity_Method;
+        const chartData =response.chartData;
        
 
         console.log("hitDataGroupBy_Entity:",hitDataGroupBy_Entity)
         console.log("hitDataGroupBy_Entity_Method:",hitDataGroupBy_Entity_Method)
+        console.log("chartData:",chartData)
 
-        for (const entity_key in hitDataGroupBy_Entity) {
-
-          entity_labels[entity_key]=hitDataGroupBy_Entity[entity_key].entityCode;
-
-          for (const entity_method_key in hitDataGroupBy_Entity_Method) {
-
-                if(hitDataGroupBy_Entity_Method[entity_method_key].entityCode ===  entity_labels[entity_key].entityCode){
-                  
-
-                }
-            
-          }
-         
+        for (const key in hitDataGroupBy_Entity) {
+          entity_labels[key]=hitDataGroupBy_Entity[key].entityCode
         }
+
+   
         console.log("entity_labels:",entity_labels)
+
+        this.setState({
+          top10:{
+            labels: entity_labels,
+            datasets:chartData
+          }        
+        })
 
         }
       )
@@ -163,28 +157,32 @@ export default class Dashboard extends Component {
           noOfRatesHits:ratesHits
         }})
 
-      this.setState({
-        top10:{
-          labels: labels,
-          datasets:[
-            {
-              label:'Cancel Txn Hits',
-              backgroundColor:"red",
-              data: cancelHits
-            },
-            {
-              label:'Send Txn Hits',
-              backgroundColor:"blue",
-              data: sendHits
-            },
-            {
-              label:'Total No of Hits',
-              backgroundColor:"green",
-              data: noOfHits
-            }
-          ]
-        }        
-      })
+        const dataforbar =[
+          {
+            label:'Txn Hits',
+            backgroundColor:"red",
+            data: cancelHits
+          },
+          {
+            label:'Send Txn Hits',
+            backgroundColor:"blue",
+            data: sendHits
+          },
+          {
+            label:'Total No of Hits',
+            backgroundColor:"#FF5733",
+            data: noOfHits
+          }
+        ]
+
+        console.log("data for bar:",dataforbar)
+
+      // this.setState({
+      //   top10:{
+      //     labels: labels,
+      //     datasets:dataforbar
+      //   }        
+      // })
     }
 
     
@@ -195,7 +193,10 @@ export default class Dashboard extends Component {
    render(){
       var chart= this.state.top10
       var indents = [];
-      for (var i = 0; i < 10; i++) {
+      console.log("SSSSSSSSSSSSSSSSSS",chart.labels.length);
+
+    
+      for (var i = 0; i < chart.labels.length; i++) {
       indents.push(<Grid item lg={6} md={4} sm={6} xs={12}>
         <Accordion allowMultipleExpanded="true" allowZeroExpanded="true">
          <AccordionItem>
@@ -204,14 +205,14 @@ export default class Dashboard extends Component {
           </AccordionItemHeading>
           <AccordionItemPanel>
             <Widget>
-
+            
                 <Typography variant="h6"><i>No of Hits: {this.state.cardData1.noOfHits[i]}</i></Typography>
                 <Typography variant="h6"><i>Send: {this.state.cardData1.noOfSendTxnHits[i]}</i></Typography>
                 <Typography variant="h6"><i>Cancel: {this.state.cardData1.noOfCancelTxnHits[i]}</i></Typography>
                 <Typography variant="h6"><i>Enquiry: {this.state.cardData1.noOfEnquiryTxnHits[i]}</i></Typography>
                 <Typography variant="h6"><i>Solr: {this.state.cardData1.noOfSolrSearchHits[i]}</i></Typography>
                 <Typography variant="h6"><i>Rates: {this.state.cardData1.noOfRatesHits[i]}</i></Typography>
-
+          
             </Widget>
             </AccordionItemPanel>
             </AccordionItem>
