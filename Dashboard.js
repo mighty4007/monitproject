@@ -4,20 +4,91 @@ import Axios from 'axios';
 import React, { Component } from "react";
 import { Accordion, AccordionItem, AccordionItemButton, AccordionItemHeading, AccordionItemPanel } from 'react-accessible-accordion';
 import 'react-accessible-accordion/dist/fancy-example.css';
-import { HorizontalBar } from 'react-chartjs-2';
+import ReactApexChart from 'react-apexcharts';
 import Widget from "../../components/Widget";
-
-import ReactApexChart from 'react-apexcharts'
+import Chart from "react-apexcharts";
 
 
 export default class Dashboard extends Component {
 
 
   state = {
-
+    totalCount: 0,
     series: [],
-    options: {}
-      
+    options: {},
+    optionsRadial: {
+      plotOptions: {
+        radialBar: {
+          startAngle: -135,
+          endAngle: 225,
+          hollow: {
+            margin: 0,
+            size: "70%",
+            background: "#fff",
+            image: undefined,
+            imageOffsetX: 0,
+            imageOffsetY: 0,
+            position: "front",
+            dropShadow: {
+              enabled: true,
+              top: 3,
+              left: 0,
+              blur: 4,
+              opacity: 0.24
+            }
+          },
+          track: {
+            background: "#fff",
+            strokeWidth: "67%",
+            margin: 0, // margin is in pixels
+            dropShadow: {
+              enabled: true,
+              top: -3,
+              left: 0,
+              blur: 4,
+              opacity: 0.35
+            }
+          },
+
+          dataLabels: {
+            showOn: "always",
+            name: {
+              offsetY: -20,
+              show: true,
+              color: "#888",
+              fontSize: "13px"
+            },
+            value: {
+              formatter: function (val) {
+                return val;
+              },
+              color: "#111",
+              fontSize: "30px",
+              show: true
+            }
+          }
+        }
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: "dark",
+          type: "horizontal",
+          shadeIntensity: 0.5,
+          gradientToColors: ["#ABE5A1"],
+          inverseColors: true,
+          opacityFrom: 1,
+          opacityTo: 1,
+          stops: [0, 100]
+        }
+      },
+      stroke: {
+        lineCap: "round"
+      },
+      labels: ["Percent"]
+    },
+    seriesRadial: [10.58],
+
   }
 
   componentWillMount() {
@@ -35,6 +106,7 @@ export default class Dashboard extends Component {
 
       const entity_labels = [];
       const entity_methods = [];
+      // let totalcount = 0;
 
       console.log("in did getAllEntityData STATE", entity_res)
 
@@ -53,11 +125,26 @@ export default class Dashboard extends Component {
       }
 
 
+      // totalcount = 
+
+      // hitDataGroupBy_Entity.map(ent => (
+      //   tot
+      // ))
+
+      // for (var i = 0; i < hitDataGroupBy_Entity.length; i++) {
+      //   console.log(hitDataGroupBy_Entity[i]);
+
+      //   totalcount = totalcount + hitDataGroupBy_Entity[i].hitCount
+      // }
+
+
       console.log("entity_labels:", entity_labels)
+      console.log("hit count", hitDataGroupBy_Entity.reduce((sum, entity) => sum + entity.hitCount, 0))
 
       this.setState({
-       
-       
+
+        totalCount: hitDataGroupBy_Entity.reduce((sum, entity) => sum + entity.hitCount, 0),
+        apiDataSet: entity_res.data,
         options: {
           chart: {
             type: 'bar',
@@ -80,7 +167,7 @@ export default class Dashboard extends Component {
             categories: entity_labels,
             labels: {
               formatter: function (val) {
-                return val 
+                return val
               }
             }
           },
@@ -92,7 +179,7 @@ export default class Dashboard extends Component {
           tooltip: {
             y: {
               formatter: function (val) {
-                return val + "K"
+                return val
               }
             }
           },
@@ -105,9 +192,79 @@ export default class Dashboard extends Component {
             offsetX: 40
           }
         },
-        
         series: chartData,
-       
+
+        optionsRadial: {
+          plotOptions: {
+            radialBar: {
+              startAngle: -135,
+              endAngle: 225,
+              hollow: {
+                margin: 0,
+                size: "70%",
+                background: "#fff",
+                image: undefined,
+                imageOffsetX: 0,
+                imageOffsetY: 0,
+                position: "front",
+                dropShadow: {
+                  enabled: true,
+                  top: 3,
+                  left: 0,
+                  blur: 4,
+                  opacity: 0.24
+                }
+              },
+              track: {
+                background: "#fff",
+                strokeWidth: "67%",
+                margin: 0, // margin is in pixels
+                dropShadow: {
+                  enabled: true,
+                  top: -3,
+                  left: 0,
+                  blur: 4,
+                  opacity: 0.35
+                }
+              },
+
+              dataLabels: {
+                showOn: "always",
+                name: {
+                  offsetY: -20,
+                  show: true,
+                  color: "#888",
+                  fontSize: "13px"
+                },
+                value: {
+                  formatter: function (val) {
+                    return val;
+                  },
+                  color: "#111",
+                  fontSize: "30px",
+                  show: true
+                }
+              }
+            }
+          },
+          fill: {
+            type: "gradient",
+            gradient: {
+              shade: "dark",
+              type: "horizontal",
+              shadeIntensity: 0.5,
+              gradientToColors: ["#ABE5A1"],
+              inverseColors: true,
+              opacityFrom: 1,
+              opacityTo: 1,
+              stops: [0, 100]
+            }
+          },
+          stroke: {
+            lineCap: "round"
+          },
+          labels: ["Percent"]
+        }
       })
 
     }
@@ -118,15 +275,67 @@ export default class Dashboard extends Component {
 
 
   render() {
+    const { apiDataSet, totalCount } = this.state;
+    console.log(totalCount);
+
+    var indents = [];
+    {
+
+      apiDataSet &&
+        apiDataSet.hitDataGroupBy_Entity.map(entity => (
+          indents.push(
+            <Grid item lg={6} md={4} sm={6} xs={12}>
+
+              <Accordion allowMultipleExpanded="true" allowZeroExpanded="true">
+                <AccordionItem>
+                  <AccordionItemHeading>
+                    <AccordionItemButton><strong>{entity.entityCode}</strong></AccordionItemButton>
+                  </AccordionItemHeading>
+                  <AccordionItemPanel>
+                    <Widget>
+                      {apiDataSet.hitDataGroupBy_Entity_Method.map(method => (
+
+                        entity.entityCode === method.entityCode &&
+                        <Typography variant="h6"><i>{method.methodName.toUpperCase()}: {method.hitCount}</i></Typography>
+
+                      ))}
+                      <Typography variant="h6"><i>Total Hits: {entity.hitCount}</i></Typography>
+
+                      <Chart
+                        options={this.state.optionsRadial}
+                        series={[Math.floor((entity.hitCount / this.state.totalCount) * 100)]}
+                        type="radialBar"
+                        width="280"
+                      />
+                    </Widget>
+                  </AccordionItemPanel>
+                </AccordionItem>
+              </Accordion>
+            </Grid>)
+        ))
+
+    }
+
+
     return (
       <div>
         <div id="chart">
           <ReactApexChart options={this.state.options} series={this.state.series} type="bar" height={350} />
         </div>
-        {/* <div id="html-dist"></div> */}
+        <div>
+          <Grid container spacing={32}>
+            {indents}
+          </Grid>
+        </div>
+
+
       </div>
+
+
+
     );
   }
 
- 
+
 }
+
