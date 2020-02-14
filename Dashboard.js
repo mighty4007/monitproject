@@ -303,7 +303,7 @@ export default class Dashboard extends Component {
 
                       <Chart
                         options={this.state.optionsRadial}
-                        series={[Math.floor((entity.hitCount / this.state.totalCount) * 100)]}
+                        series={[((entity.hitCount / this.state.totalCount) * 100).toFixed(1)]}
                         type="radialBar"
                         width="280"
                       />
@@ -338,4 +338,3 @@ export default class Dashboard extends Component {
 
 
 }
-
